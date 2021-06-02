@@ -155,8 +155,7 @@ class FfmpegBase():
         return None
 
     def _getDefaultChapterName(self, chapterNumber=''):
-        chapterTitle = "%s %d" % (ADDON.getLocalizedString(32017), chapterNumber)
-        return chapterTitle
+        return "%s %d" % (ADDON.getLocalizedString(32017), chapterNumber)
 
 
 # Class to handle using the libraries
@@ -227,9 +226,7 @@ class FFMpegLib(FfmpegBase):
 
     # Check if using libraries is supported
     def isSupported(self):
-        if self.av_register_all in [None, ""]:
-            return False
-        return True
+        return self.av_register_all not in [None, ""]
 
     # Get the information for a given media file
     def getMediaInfo(self, mediaName, coverTempName=None):
@@ -315,9 +312,12 @@ class FFMpegLib(FfmpegBase):
 
                 # Need the offset multiplier for the chapter timings
                 rat = 1
-                if chapter.contents.time_base not in [None, ""]:
-                    if (chapter.contents.time_base.num not in [None, ""]) and (chapter.contents.time_base.den not in [None, ""]):
-                        rat = float(chapter.contents.time_base.num) / float(chapter.contents.time_base.den)
+                if (
+                    chapter.contents.time_base not in [None, ""]
+                    and (chapter.contents.time_base.num not in [None, ""])
+                    and (chapter.contents.time_base.den not in [None, ""])
+                ):
+                    rat = float(chapter.contents.time_base.num) / float(chapter.contents.time_base.den)
 
                 # Get the metadata for the chapter
                 chapterInfo = self._getMetadata(chapter.contents.metadata)
@@ -433,9 +433,7 @@ class FfmpegCmd(FfmpegBase):
 
     # Check if using executable is supported
     def isSupported(self):
-        if self.ffmpeg in [None, ""]:
-            return False
-        return True
+        return self.ffmpeg not in [None, ""]
 
     def getMediaInfo(self, mediaName, coverTempName=None):
 
@@ -622,10 +620,15 @@ class FfmpegCmd(FfmpegBase):
             duration = totalDuration
 
         if (title in [None, ""]) and (album in [None, ""]) and (duration in [None, ""]) and (len(chapters) < 1):
-            returnData = None
+            return None
         else:
-            returnData = {'title': title, 'album': album, 'artist': artist, 'duration': duration, 'chapters': chapters}
-        return returnData
+            return {
+                'title': title,
+                'album': album,
+                'artist': artist,
+                'duration': duration,
+                'chapters': chapters,
+            }
 
     # Converts a time string 00:00:00.00 to the total number of seconds
     def _getSecondsInTimeString(self, fullTimeString):
@@ -640,7 +643,6 @@ class FfmpegCmd(FfmpegBase):
                 hours = int(timeParts[2])
             if len(timeParts) > 1:
                 minutes = int(timeParts[1])
-            if len(timeParts) > 1:
                 seconds = int(float(timeParts[0]))
         except:
             # time sections are not numbers
