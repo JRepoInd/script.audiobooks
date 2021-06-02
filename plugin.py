@@ -147,9 +147,8 @@ class MenuNavigator():
             coverTargetName = audioBookHandler.getCoverImage(True)
 
             isRead = False
-            if Settings.isMarkCompletedItems():
-                if audioBookHandler.isCompleted():
-                    isRead = True
+            if Settings.isMarkCompletedItems() and audioBookHandler.isCompleted():
+                isRead = True
 
             displayString = title
             try:
@@ -490,9 +489,12 @@ if __name__ == '__main__':
             startTimeVal = int(startTime[0])
 
         isComplete = False
-        if (completeStatus is not None) and (len(completeStatus) > 0):
-            if completeStatus[0] == '1':
-                isComplete = True
+        if (
+            (completeStatus is not None)
+            and (len(completeStatus) > 0)
+            and completeStatus[0] == '1'
+        ):
+            isComplete = True
 
         if (filename is not None) and (len(filename) > 0):
             menuNav = MenuNavigator(base_url, addon_handle)

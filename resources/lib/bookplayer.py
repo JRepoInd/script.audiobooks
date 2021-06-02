@@ -26,7 +26,7 @@ class BookPlayer(xbmc.Player):
         loopCount = 3000
         while (not bookPlayer.isPlaying()) and (loopCount > 0):
             xbmc.sleep(1)
-            loopCount = loopCount - 1
+            loopCount -= 1
 
         # Looks like the audiobook never started for some reason, do not go any further
         if loopCount == 0:
@@ -69,17 +69,18 @@ class BookPlayer(xbmc.Player):
             bookComplete = False
             duration = audioBookHandler.getTotalDuration()
             log("BookPlayer: Total book duration is %d" % duration)
-            if duration > 1:
-                if currentTime > (duration - 60):
-                    log("BookPlayer: Marking entire book as complete")
-                    bookComplete = True
+            if duration > 1 and currentTime > (duration - 60):
+                log("BookPlayer: Marking entire book as complete")
+                bookComplete = True
 
             # If dealing with multiple files for a single book, need to check if the entire
             # book is complete
-            if chapterPosition == len(audioBookHandler.getChapterDetails()):
-                if (currentTime + 60) > totalTrackTime:
-                    log("BookPlayer: Marking book as complete")
-                    bookComplete = True
+            if (
+                chapterPosition == len(audioBookHandler.getChapterDetails())
+                and (currentTime + 60) > totalTrackTime
+            ):
+                log("BookPlayer: Marking book as complete")
+                bookComplete = True
 
             audiobookDB = AudioBooksDB()
             audiobookDB.setPosition(audioBookHandler.getFile(), currentTime, chapterPosition, bookComplete)

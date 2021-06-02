@@ -42,11 +42,9 @@ class AudioBookHandler():
         audiobookType = None
         # Check which type of Audiobook it is
         if audioBookFilePath.lower().endswith('.m4b'):
-            audiobookType = M4BHandler(audioBookFilePath)
+            return M4BHandler(audioBookFilePath)
         else:
-            audiobookType = FolderHandler(audioBookFilePath)
-
-        return audiobookType
+            return FolderHandler(audioBookFilePath)
 
     def _getCopiedFileIfNeeded(self, fullPath):
         copiedFile = None
@@ -69,9 +67,8 @@ class AudioBookHandler():
 
     def _removeCopiedFile(self, copiedFile):
         # If we had to copy the file locally, make sure we delete it
-        if copiedFile not in [None, ""]:
-            if xbmcvfs.exists(copiedFile):
-                xbmcvfs.delete(copiedFile)
+        if copiedFile not in [None, ""] and xbmcvfs.exists(copiedFile):
+            xbmcvfs.delete(copiedFile)
 
     def _readMetaData(self, inputFileName):
         log("AudioBookHandler: Reading Metadata for audio book %s" % inputFileName)
@@ -106,18 +103,22 @@ class AudioBookHandler():
                 title = mutagenFile.get('title', emptyArray)[0]
                 album = mutagenFile.get('album', emptyArray)[0]
                 artist = mutagenFile.get('artist', emptyArray)[0]
-                if mutagenFile.info not in [None, ""]:
-                    if mutagenFile.info.length not in [None, ""]:
-                        duration = int(float(mutagenFile.info.length))
+                if mutagenFile.info not in [
+                    None,
+                    "",
+                ] and mutagenFile.info.length not in [None, ""]:
+                    duration = int(float(mutagenFile.info.length))
             del mutagenFile
 
             log("AudioBookHandler: title = %s, album = %s, duration = %d" % (title, album, duration))
 
             # If we have had to copy the file locally, check if we need to also
             # get the image as well, otherwise we might copy the file twice
-            if copiedFile not in [None, ""]:
-                if self._getExistingCoverImage() in [None, ""]:
-                    self._saveAlbumArtFromMetadata(fullPath)
+            if copiedFile not in [None, ""] and self._getExistingCoverImage() in [
+                None,
+                "",
+            ]:
+                self._saveAlbumArtFromMetadata(fullPath)
         except:
             log("AudioBookHandler: Failed to read metadata for audio book %s, %s" % (fullPath, traceback.format_exc()))
             title = None
@@ -543,17 +544,16 @@ class AudioBookHandler():
         self._removeCopiedFile(copiedFile)
 
         # Check if there is an image in the temporary location
-        if coverTempName not in [None, ""]:
-            if xbmcvfs.exists(coverTempName):
-                # Now move the file to the covers cache directory
-                copy = xbmcvfs.copy(coverTempName, coverTargetName)
-                if copy:
-                    log("AudioBookHandler: copy successful for %s" % coverTargetName)
-                else:
-                    log("AudioBookHandler: copy failed from %s to %s" % (coverTempName, coverTargetName))
+        if coverTempName not in [None, ""] and xbmcvfs.exists(coverTempName):
+            # Now move the file to the covers cache directory
+            copy = xbmcvfs.copy(coverTempName, coverTargetName)
+            if copy:
+                log("AudioBookHandler: copy successful for %s" % coverTargetName)
+            else:
+                log("AudioBookHandler: copy failed from %s to %s" % (coverTempName, coverTargetName))
 
-                # Tidy up the image that we actually do not need
-                xbmcvfs.delete(coverTempName)
+            # Tidy up the image that we actually do not need
+            xbmcvfs.delete(coverTempName)
 
         return ffmpegOutput
 
